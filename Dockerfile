@@ -1,20 +1,22 @@
-# Use the official Python image as the base image
-FROM python:3.8-slim
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements.txt file first for better caching
-COPY requirements.txt /app/
+# Clone the repository
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/Amomin0512/Number-to-Name.git .
+RUN apt-get remove -y git && apt-get autoremove -y
 
-# Update pip and install the application dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install Flask and any other required packages
+RUN pip install --no-cache-dir flask
 
-# Copy the rest of the application files into the working directory
-COPY . /app
-
-# Expose the port on which the Flask app will run
+# Expose port 5000 for the Flask application
 EXPOSE 5000
 
-# Define the entry point for the container
+# Define environment variable
+ENV FLASK_APP=app.py
+
+# Run the Flask application
 CMD ["flask", "run", "--host=0.0.0.0"]
