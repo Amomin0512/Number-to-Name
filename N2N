@@ -1,0 +1,66 @@
+# app.py
+from flask import Flask, request, jsonify
+from decimal import Decimal
+
+app = Flask(__name__)
+
+def round_num(n, decimals):
+    return n.to_integral() if n == n.to_integral() else round(n.normalize(), decimals)
+
+def drop_zero(n):
+    n = str(n)
+    return n.rstrip('0').rstrip('.') if '.' in n else n
+
+def numerize(n, decimals=2):
+    is_negative_string = ""
+    if n < 0:
+        is_negative_string = "-"
+    n = abs(Decimal(n))
+    
+    if n < 1000:
+        return is_negative_string + str(drop_zero(round_num(n, decimals)))
+    
+    elif 1000 <= n < 1_000_000:
+        if n % 1000 == 0:
+            return is_negative_string + str(int(n / 1000)) + "k"
+        else:
+            n = n / 1000
+            return is_negative_string + str(drop_zero(round_num(n, decimals))) + "k"
+    
+    elif 1_000_000 <= n < 1_000_000_000:
+        if n % 1_000_000 == 0:
+            return is_negative_string + str(int(n / 1_000_000)) + "M"
+        else:
+            n = n / 1_000_000
+            return is_negative_string + str(drop_zero(round_num(n, decimals))) + "M"
+    
+    elif 1_000_000_000 <= n < 1_000_000_000_000:
+        if n % 1_000_000_000 == 0:
+            return is_negative_string + str(int(n / 1_000_000_000)) + "B"
+        else:
+            n = n / 1_000_000_000
+            return is_negative_string + str(drop_zero(round_num(n, decimals))) + "B"
+    
+    elif 1_000_000_000_000 <= n < 1_000_000_000_000_000:
+        if n % 1_000_000_000_000 == 0:
+            return is_negative_string + str(int(n / 1_000_000_000_000)) + "T"
+        else:
+            n = n / 1_000_000_000_000
+            return is_negative_string + str(drop_zero(round_num(n, decimals))) + "T"
+    
+    else:
+        return is_negative_string + str(n)
+
+@app.route('/numerize', methods=['POST'])
+def numerize_route():
+    try:
+        data = request.json
+        number = Decimal(data.get('number'))
+        decimals = data.get('decimals', 2)
+        result = numerize(number, decimals)
+        return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
