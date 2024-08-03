@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numerize Number</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="number"], input[type="text"], button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Numerize Number</h1>
+        <input type="number" id="numberInput" placeholder="Enter number" step="any">
+        <input type="number" id="decimalsInput" placeholder="Decimal places" value="2">
+        <button onclick="numerizeNumber()">Convert</button>
+        <div id="result" class="result"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        async function numerizeNumber() {
+            const number = document.getElementById('numberInput').value;
+            const decimals = document.getElementById('decimalsInput').value;
+
+            try {
+                const response = await fetch('/numerize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        number: number,
+                        decimals: decimals
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('result').innerText = `Numerized: ${result.result}`;
+                    document.getElementById('error').innerText = '';
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                document.getElementById('error').innerText = `Error: ${error.message}`;
+                document.getElementById('result').innerText = '';
+            }
+        }
+    </script>
+</body>
+</html>
