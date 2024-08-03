@@ -1,22 +1,11 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM ubuntu: latest
 
-# Set the working directory in the container
-WORKDIR /app
+RUN apt-get update
 
-# Clone the repository
-RUN apt-get update && apt-get install -y git
-RUN git clone https://github.com/Amomin0512/Number-to-Name.git .
-RUN apt-get remove -y git && apt-get autoremove -y
+RUN apt-get -y install nginx
 
-# Install Flask and any other required packages
-RUN pip install --no-cache-dir flask
+COPY index.html /var/www/html/index.html
 
-# Expose port 5000 for the Flask application
-EXPOSE 5000
+EXPOSE 80
 
-# Define environment variable
-ENV FLASK_APP=app.py
-
-# Run the Flask application
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["nginx", "-g", "daemon off;"]
